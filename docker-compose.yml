@@ -1,0 +1,38 @@
+﻿services:
+  db:
+    image: postgres:17-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d online_poll_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  onlinepoll:
+    image: onlinepoll
+    build:
+      context: .
+      dockerfile: OnlinePoll/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: online_poll_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - "80:8080"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

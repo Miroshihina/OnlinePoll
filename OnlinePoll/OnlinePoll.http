@@ -1,0 +1,6 @@
+@OnlinePoll_HostAddress = http://localhost:5039
+
+GET {{OnlinePoll_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
